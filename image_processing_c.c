@@ -41,23 +41,7 @@ AccurateImage *convertToAccurateImage(PPMImage *image) {
 	return imageAccurate;
 }
 
-/*PPMImage * convertToPPPMImage(AccurateImage *imageIn) {
-    PPMImage *imageOut;
-    imageOut = (PPMImage *)malloc(sizeof(PPMImage));
-    imageOut->data = (PPMPixel*)malloc(imageIn->x * imageIn->y * sizeof(PPMPixel));
-
-    imageOut->x = imageIn->x;
-    imageOut->y = imageIn->y;
-
-    for(int i = 0; i < imageIn->x * imageIn->y; i++) {
-        imageOut->data[i].red = imageIn->data[i].red;
-        imageOut->data[i].green = imageIn->data[i].green;
-        imageOut->data[i].blue = imageIn->data[i].blue;
-    }
-    return imageOut;
-}*/
-
-// blur one color channel
+// CHANGED TO ACCUMULATION ALGORITHM IN THE X DIRECTION
 void blurIteration(AccurateImage *imageOut, AccurateImage *imageIn, AccurateImage *temp, int size) {
 	
 	// Iterate over each pixel
@@ -113,66 +97,66 @@ void blurIteration(AccurateImage *imageOut, AccurateImage *imageIn, AccurateImag
 
 	}
 
+		double sum1= 0;
+		double sum2= 0;
+		double sum3= 0;
+		int countIncluded = 0;
+		int numberOfValuesInEachRow = imageIn->x;
+
+	omp_set_num_threads(4);
+	#pragma omp parallel for schedule (dynamic, 4)
+
 	for(int senterY = 0; senterY < temp->y; senterY++) {
-	
 		for(int senterX = 0; senterX < temp->x; senterX++) {
 
-
-			// For each pixel we compute the magic number
-			double sum1= 0;
-			double sum2= 0;
-			double sum3= 0;
-			int countIncluded = 0;
-			if (senterX-size-1<0){
+			if (senterX-(size+1)<0){
+				sum1= 0;
+				sum2= 0;
+				sum3= 0;
+				countIncluded = 0;
+	
 				for(int x = -size; x <= size; x++) {
 					int currentX = senterX + x;
 					int currentY = senterY;
 
-					// Check if we are outside the bounds
 					if(currentX < 0)
 						continue;
-					if(currentX >= temp->x)
-						continue;
 
-					// Now we can begin
-					int numberOfValuesInEachRow = imageIn->x;
 					int offsetOfThePixel = (numberOfValuesInEachRow * currentY + currentX);
 					sum1 += temp->data[offsetOfThePixel].red;
 					sum2 += temp->data[offsetOfThePixel].green;
 					sum3 += temp->data[offsetOfThePixel].blue;
 
-					// Keep track of how many values we have included
 					countIncluded++;
 
 				}
 			}
-			else if (senterX+size+1>temp->x){
-				int numberOfValuesInEachRow = imageIn->x;
-				int offsetOfThePixel = (numberOfValuesInEachRow * senterY + senterX);
-				sum1 -= temp->data[offsetOfThePixel+size].red;
-				sum2 -= temp->data[offsetOfThePixel+size].green;
-				sum3 -= temp->data[offsetOfThePixel+size].blue;
-			
-				countIncluded++;
+
+			else if (senterX+size>=temp->x){
+
+					if(senterX >= temp->x)
+						continue;
+					
+				int offsetOfThePixel = (numberOfValuesInEachRow * senterY + senterX-(size+1));
+				sum1 = sum1 - temp->data[offsetOfThePixel].red;
+				sum2 = sum2 - temp->data[offsetOfThePixel].green;
+				sum3 = sum3 - temp->data[offsetOfThePixel].blue;
+				countIncluded--;
 			}
 			else{
-				int numberOfValuesInEachRow = imageIn->x;
-				int offsetOfThePixel = (numberOfValuesInEachRow * senterY + senterX);
-				sum1 = sum1 + temp->data[offsetOfThePixel+size].red - temp->data[offsetOfThePixel-size].red;
-				sum2 = sum2 + temp->data[offsetOfThePixel+size].green - temp->data[offsetOfThePixel-size].green;
-				sum3 = sum3 + temp->data[offsetOfThePixel+size].blue - temp->data[offsetOfThePixel-size].blue;
-
-				countIncluded++;
+			
+				int offsetOfThePixel_remove = (numberOfValuesInEachRow * senterY + senterX-(size+1));
+				int offsetOfThePixel_add = (numberOfValuesInEachRow * senterY + senterX+(size));
+				sum1 = sum1 - temp->data[offsetOfThePixel_remove].red + temp->data[offsetOfThePixel_add].red ;
+				sum2 = sum2 - temp->data[offsetOfThePixel_remove].green + temp->data[offsetOfThePixel_add].green ;
+				sum3 = sum3 - temp->data[offsetOfThePixel_remove].blue + temp->data[offsetOfThePixel_add].blue ;
 			}
 
-			// Now we compute the final value
 			double value1 = sum1 / countIncluded;
 			double value2 = sum2 / countIncluded;
 			double value3 = sum3 / countIncluded;
 
 
-			// Update the output image
-			int numberOfValuesInEachRow = imageOut->x; // R, G and B
 			int offsetOfThePixel = (numberOfValuesInEachRow * senterY + senterX);
 			imageOut->data[offsetOfThePixel].red = value1;
 			imageOut->data[offsetOfThePixel].green = value2;
@@ -267,17 +251,7 @@ int main(int argc, char** argv) {
 	blurIteration(imageAccurate2_tiny, imageAccurate1_tiny, temp, size);
 	blurIteration(imageAccurate1_tiny, imageAccurate2_tiny, temp, size);
 	blurIteration(imageAccurate2_tiny, imageAccurate1_tiny, temp, size);
-	
-	/*
-	blurIteration(imageAccurate2_tiny, imageAccurate2_tiny, size);
-	blurIteration(imageAccurate2_tiny, imageAccurate2_tiny, size);
-	blurIteration(imageAccurate2_tiny, imageAccurate2_tiny, size);
-	blurIteration(imageAccurate2_tiny, imageAccurate2_tiny, size);
-	blurIteration(imageAccurate2_tiny, imageAccurate2_tiny, size);
-	*/
-
-	
-	
+		
 	AccurateImage *imageAccurate1_small = convertToAccurateImage(image);
 	AccurateImage *imageAccurate2_small = convertToAccurateImage(image);
 	
@@ -290,7 +264,7 @@ int main(int argc, char** argv) {
 	blurIteration(imageAccurate2_small, imageAccurate1_small, temp, size);
 
     // an intermediate step can be saved for debugging like this
-//    writePPM("imageAccurate2_tiny.ppm", convertToPPPMImage(imageAccurate2_tiny));
+	// writePPM("imageAccurate2_tiny.ppm", convertToPPPMImage(imageAccurate2_tiny));
 	
 	AccurateImage *imageAccurate1_medium = convertToAccurateImage(image);
 	AccurateImage *imageAccurate2_medium = convertToAccurateImage(image);

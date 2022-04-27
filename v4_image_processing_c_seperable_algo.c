@@ -51,17 +51,13 @@ PPMImage * convertToPPPMImage(AccurateImage *imageIn) {
     return imageOut;
 }
 
-// blur one color channel
-void blurIteration(AccurateImage *imageOut, AccurateImage *imageIn, int size) {
+void blurIteration(AccurateImage *imageOut, AccurateImage *imageIn, AccurateImage *temp, int size) {
 	
 	// Iterate over each pixel
 
-	AccurateImage *imageOut_temp = convertToAccurateImage(imageIn);
-	
 	for(int senterY = 0; senterY < imageIn->y; senterY++) {
 	
 		for(int senterX = 0; senterX < imageIn->x; senterX++) {
-
 
 			// For each pixel we compute the magic number
 			double sum1= 0;
@@ -73,12 +69,12 @@ void blurIteration(AccurateImage *imageOut, AccurateImage *imageIn, int size) {
 				int currentX = senterX ;
 				int currentY = senterY + y;
 
-
 				if(currentY < 0)
 					continue;
 				if(currentY >= imageIn->y)
 					continue;
 
+		
 				// Now we can begin
 				int numberOfValuesInEachRow = imageIn->x;
 				int offsetOfThePixel = (numberOfValuesInEachRow * currentY + currentX);
@@ -88,7 +84,6 @@ void blurIteration(AccurateImage *imageOut, AccurateImage *imageIn, int size) {
 
 				// Keep track of how many values we have included
 				countIncluded++;
-
 			}
 
 			// Now we compute the final value
@@ -100,16 +95,18 @@ void blurIteration(AccurateImage *imageOut, AccurateImage *imageIn, int size) {
 			// Update the output image
 			int numberOfValuesInEachRow = imageOut->x; // R, G and B
 			int offsetOfThePixel = (numberOfValuesInEachRow * senterY + senterX);
-			imageOut_temp->data[offsetOfThePixel].red = value1;
-			imageOut_temp->data[offsetOfThePixel].green = value2;
-			imageOut_temp->data[offsetOfThePixel].blue = value3;
+			temp->data[offsetOfThePixel].red = value1;
+			temp->data[offsetOfThePixel].green = value2;
+			temp->data[offsetOfThePixel].blue = value3;
+			
+			//temp->data[offsetOfThePixel] = vbector;
 		}
 
 	}
 
-	for(int senterY = 0; senterY < imageOut_temp->y; senterY++) {
+	for(int senterY = 0; senterY < temp->y; senterY++) {
 	
-		for(int senterX = 0; senterX < imageOut_temp->x; senterX++) {
+		for(int senterX = 0; senterX < temp->x; senterX++) {
 
 
 			// For each pixel we compute the magic number
@@ -117,7 +114,7 @@ void blurIteration(AccurateImage *imageOut, AccurateImage *imageIn, int size) {
 			double sum2= 0;
 			double sum3= 0;
 			int countIncluded = 0;
-
+			
 		    for(int x = -size; x <= size; x++) {
 				int currentX = senterX + x;
 				int currentY = senterY;
@@ -125,16 +122,15 @@ void blurIteration(AccurateImage *imageOut, AccurateImage *imageIn, int size) {
 				// Check if we are outside the bounds
 				if(currentX < 0)
 					continue;
-				if(currentX >= imageIn->x)
+				if(currentX >= temp->x)
 					continue;
-
 
 				// Now we can begin
 				int numberOfValuesInEachRow = imageIn->x;
 				int offsetOfThePixel = (numberOfValuesInEachRow * currentY + currentX);
-				sum1 += imageOut_temp->data[offsetOfThePixel].red;
-				sum2 += imageOut_temp->data[offsetOfThePixel].green;
-				sum3 += imageOut_temp->data[offsetOfThePixel].blue;
+				sum1 += temp->data[offsetOfThePixel].red;
+				sum2 += temp->data[offsetOfThePixel].green;
+				sum3 += temp->data[offsetOfThePixel].blue;
 
 				// Keep track of how many values we have included
 				countIncluded++;
@@ -156,9 +152,7 @@ void blurIteration(AccurateImage *imageOut, AccurateImage *imageIn, int size) {
 		}
 
 	}
-	free(imageOut_temp);
 }
-
 
 // Perform the final step, and return it as ppm.
 PPMImage * imageDifference(AccurateImage *imageInSmall, AccurateImage *imageInLarge) {
@@ -244,21 +238,11 @@ int main(int argc, char** argv) {
 	blurIteration(imageAccurate1_tiny, imageAccurate2_tiny, size);
 	blurIteration(imageAccurate2_tiny, imageAccurate1_tiny, size);
 	
-	/*
-	blurIteration(imageAccurate2_tiny, imageAccurate2_tiny, size);
-	blurIteration(imageAccurate2_tiny, imageAccurate2_tiny, size);
-	blurIteration(imageAccurate2_tiny, imageAccurate2_tiny, size);
-	blurIteration(imageAccurate2_tiny, imageAccurate2_tiny, size);
-	blurIteration(imageAccurate2_tiny, imageAccurate2_tiny, size);
-	*/
-
-	
-	
 	AccurateImage *imageAccurate1_small = convertToAccurateImage(image);
 	AccurateImage *imageAccurate2_small = convertToAccurateImage(image);
 	
 	// Process the small case:
-		size = 3;
+	size = 3;
 	blurIteration(imageAccurate2_small, imageAccurate1_small, size);
 	blurIteration(imageAccurate1_small, imageAccurate2_small, size);
 	blurIteration(imageAccurate2_small, imageAccurate1_small, size);
