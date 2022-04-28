@@ -79,42 +79,27 @@ void blurIteration(AccurateImage *imageOut, AccurateImage *imageIn, AccurateImag
 				// Now we can begin
 				int numberOfValuesInEachRow = imageIn->x;
 				int offsetOfThePixel = (numberOfValuesInEachRow * currentY + currentX);
-				/*
-				sum1 += imageIn->data[offsetOfThePixel].red;
-				sum2 += imageIn->data[offsetOfThePixel].green;
-				sum3 += imageIn->data[offsetOfThePixel].blue;
-				*/
-			sum += in_v[offsetOfThePixel];
+			
+				sum += in_v[offsetOfThePixel];
 
 				// Keep track of how many values we have included
 				countIncluded++;
 			}
 
-			// Now we compute the final value
-			/*
-			double value1 = sum1 / countIncluded;
-			double value2 = sum2 / countIncluded;
-			double value3 = sum3 / countIncluded;
-			*/
+			
 			value_v = sum / countIncluded;
 
 
 			// Update the output image
 			int numberOfValuesInEachRow = imageOut->x; // R, G and B
 			int offsetOfThePixel = (numberOfValuesInEachRow * senterY + senterX);
-			/*
-			temp->data[offsetOfThePixel].red = value1;
-			temp->data[offsetOfThePixel].green = value2;
-			temp->data[offsetOfThePixel].blue = value3;*/
+			
 			temp_v[offsetOfThePixel] = value_v;
 		}
 
 	}
 
-		/*double sum1= 0;
-		double sum2= 0;
-		double sum3= 0;
-		*/
+	
 		sum = sum * 0;
 		int countIncluded = 0;
 		int numberOfValuesInEachRow = imageIn->x;
@@ -126,9 +111,7 @@ void blurIteration(AccurateImage *imageOut, AccurateImage *imageIn, AccurateImag
 		for(int senterX = 0; senterX < temp->x; senterX++) {
 
 			if (senterX-(size+1)<0){
-				/*sum1= 0;
-				sum2= 0;
-				sum3= 0;*/
+			
 				sum = sum * 0;
 				countIncluded = 0;
 	
@@ -140,9 +123,7 @@ void blurIteration(AccurateImage *imageOut, AccurateImage *imageIn, AccurateImag
 						continue;
 
 					int offsetOfThePixel = (numberOfValuesInEachRow * currentY + currentX);
-					/*sum1 += temp->data[offsetOfThePixel].red;
-					sum2 += temp->data[offsetOfThePixel].green;
-					sum3 += temp->data[offsetOfThePixel].blue;*/
+				
 					sum += temp_v[offsetOfThePixel];
 
 					countIncluded++;
@@ -156,9 +137,7 @@ void blurIteration(AccurateImage *imageOut, AccurateImage *imageIn, AccurateImag
 						continue;
 					
 				int offsetOfThePixel = (numberOfValuesInEachRow * senterY + senterX-(size+1));
-				/*sum1 = sum1 - temp->data[offsetOfThePixel].red;
-				sum2 = sum2 - temp->data[offsetOfThePixel].green;
-				sum3 = sum3 - temp->data[offsetOfThePixel].blue;*/
+			
 				sum = sum - temp_v[offsetOfThePixel];
 				countIncluded--;
 			}
@@ -166,22 +145,14 @@ void blurIteration(AccurateImage *imageOut, AccurateImage *imageIn, AccurateImag
 			
 				int offsetOfThePixel_remove = (numberOfValuesInEachRow * senterY + senterX-(size+1));
 				int offsetOfThePixel_add = (numberOfValuesInEachRow * senterY + senterX+(size));
-				/*sum1 = sum1 - temp->data[offsetOfThePixel_remove].red + temp->data[offsetOfThePixel_add].red ;
-				sum2 = sum2 - temp->data[offsetOfThePixel_remove].green + temp->data[offsetOfThePixel_add].green ;
-				sum3 = sum3 - temp->data[offsetOfThePixel_remove].blue + temp->data[offsetOfThePixel_add].blue ;*/
 				sum = sum - temp_v[offsetOfThePixel_remove]+temp_v[offsetOfThePixel_add];
 			}
 
-			/*double value1 = sum1 / countIncluded;
-			double value2 = sum2 / countIncluded;
-			double value3 = sum3 / countIncluded;*/
 			value_v = sum / countIncluded;
 
 
 			int offsetOfThePixel = (numberOfValuesInEachRow * senterY + senterX);
-			/*imageOut->data[offsetOfThePixel].red = value1;
-			imageOut->data[offsetOfThePixel].green = value2;
-			imageOut->data[offsetOfThePixel].blue = value3;*/
+		
 			out_v[offsetOfThePixel] = value_v;
 		}
 

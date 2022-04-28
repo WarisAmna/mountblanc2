@@ -51,7 +51,7 @@ PPMImage * convertToPPPMImage(AccurateImage *imageIn) {
     return imageOut;
 }
 
-// blur one color channel
+
 void blurIteration(AccurateImage *imageOut, AccurateImage *imageIn, int size) {
 	
 	// Iterate over each pixel
@@ -201,7 +201,7 @@ int main(int argc, char** argv) {
 	AccurateImage *imageAccurate2_small = convertToAccurateImage(image);
 	
 	// Process the small case:
-    int size = 3;
+    size = 3;
     blurIteration(imageAccurate2_small, imageAccurate1_small, size);
     blurIteration(imageAccurate1_small, imageAccurate2_small, size);
     blurIteration(imageAccurate2_small, imageAccurate1_small, size);
@@ -215,7 +215,7 @@ int main(int argc, char** argv) {
 	AccurateImage *imageAccurate2_medium = convertToAccurateImage(image);
 	
 	// Process the medium case:
-    int size = 5;
+    size = 5;
     blurIteration(imageAccurate2_medium, imageAccurate1_medium, size);
     blurIteration(imageAccurate1_medium, imageAccurate2_medium, size);
     blurIteration(imageAccurate2_medium, imageAccurate1_medium, size);
@@ -225,7 +225,7 @@ int main(int argc, char** argv) {
 	AccurateImage *imageAccurate1_large = convertToAccurateImage(image);
 	AccurateImage *imageAccurate2_large = convertToAccurateImage(image);
 	
-    int size = 8;
+	size = 8;
     blurIteration(imageAccurate2_large, imageAccurate1_large, size);
     blurIteration(imageAccurate1_large, imageAccurate2_large, size);
     blurIteration(imageAccurate2_large, imageAccurate1_large, size);

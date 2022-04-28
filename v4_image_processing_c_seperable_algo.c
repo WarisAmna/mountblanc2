@@ -229,25 +229,27 @@ int main(int argc, char** argv) {
 	AccurateImage *imageAccurate1_tiny = convertToAccurateImage(image);
 	AccurateImage *imageAccurate2_tiny = convertToAccurateImage(image);
 	
+	AccurateImage *temp = convertToAccurateImage(image);
+
 	// Process the tiny case:
 	int size = 2;
 	
-	blurIteration(imageAccurate2_tiny, imageAccurate1_tiny, size);
-	blurIteration(imageAccurate1_tiny, imageAccurate2_tiny, size);
-	blurIteration(imageAccurate2_tiny, imageAccurate1_tiny, size);
-	blurIteration(imageAccurate1_tiny, imageAccurate2_tiny, size);
-	blurIteration(imageAccurate2_tiny, imageAccurate1_tiny, size);
+	blurIteration(imageAccurate2_tiny, imageAccurate1_tiny, temp, size);
+	blurIteration(imageAccurate1_tiny, imageAccurate2_tiny, temp, size);
+	blurIteration(imageAccurate2_tiny, imageAccurate1_tiny, temp, size);
+	blurIteration(imageAccurate1_tiny, imageAccurate2_tiny, temp, size);
+	blurIteration(imageAccurate2_tiny, imageAccurate1_tiny, temp, size);
 	
 	AccurateImage *imageAccurate1_small = convertToAccurateImage(image);
 	AccurateImage *imageAccurate2_small = convertToAccurateImage(image);
 	
 	// Process the small case:
 	size = 3;
-	blurIteration(imageAccurate2_small, imageAccurate1_small, size);
-	blurIteration(imageAccurate1_small, imageAccurate2_small, size);
-	blurIteration(imageAccurate2_small, imageAccurate1_small, size);
-	blurIteration(imageAccurate1_small, imageAccurate2_small, size);
-	blurIteration(imageAccurate2_small, imageAccurate1_small, size);
+	blurIteration(imageAccurate2_small, imageAccurate1_small, temp, size);
+	blurIteration(imageAccurate1_small, imageAccurate2_small, temp, size);
+	blurIteration(imageAccurate2_small, imageAccurate1_small, temp, size);
+	blurIteration(imageAccurate1_small, imageAccurate2_small, temp, size);
+	blurIteration(imageAccurate2_small, imageAccurate1_small, temp, size);
 
     // an intermediate step can be saved for debugging like this
 //    writePPM("imageAccurate2_tiny.ppm", convertToPPPMImage(imageAccurate2_tiny));
@@ -257,22 +259,23 @@ int main(int argc, char** argv) {
 	
 	// Process the medium case:
 	size = 5;
-	blurIteration(imageAccurate2_medium, imageAccurate1_medium, size);
-	blurIteration(imageAccurate1_medium, imageAccurate2_medium, size);
-	blurIteration(imageAccurate2_medium, imageAccurate1_medium, size);
-	blurIteration(imageAccurate1_medium, imageAccurate2_medium, size);
-	blurIteration(imageAccurate2_medium, imageAccurate1_medium, size);
+	blurIteration(imageAccurate2_medium, imageAccurate1_medium, temp, size);
+	blurIteration(imageAccurate1_medium, imageAccurate2_medium, temp, size);
+	blurIteration(imageAccurate2_medium, imageAccurate1_medium, temp, size);
+	blurIteration(imageAccurate1_medium, imageAccurate2_medium, temp, size);
+	blurIteration(imageAccurate2_medium, imageAccurate1_medium, temp, size);
 	
 	AccurateImage *imageAccurate1_large = convertToAccurateImage(image);
 	AccurateImage *imageAccurate2_large = convertToAccurateImage(image);
 	
-	// Do each color channel
+
 	size = 8;
-	blurIteration(imageAccurate2_large, imageAccurate1_large, size);
-	blurIteration(imageAccurate1_large, imageAccurate2_large, size);
-	blurIteration(imageAccurate2_large, imageAccurate1_large, size);
-	blurIteration(imageAccurate1_large, imageAccurate2_large, size);
-	blurIteration(imageAccurate2_large, imageAccurate1_large, size);
+	blurIteration(imageAccurate2_large, imageAccurate1_large, temp, size);
+	blurIteration(imageAccurate1_large, imageAccurate2_large, temp, size);
+	blurIteration(imageAccurate2_large, imageAccurate1_large, temp, size);
+	blurIteration(imageAccurate1_large, imageAccurate2_large, temp, size);
+	blurIteration(imageAccurate2_large, imageAccurate1_large, temp, size);
+
 	// calculate difference
 	PPMImage *final_tiny = imageDifference(imageAccurate2_tiny, imageAccurate2_small);
     PPMImage *final_small = imageDifference(imageAccurate2_small, imageAccurate2_medium);
